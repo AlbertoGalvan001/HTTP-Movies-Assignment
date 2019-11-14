@@ -47,6 +47,23 @@ const UpdateMovie = props => {
         setMovie({ ...initialState });
     }
 
+    return (
+        <div className='update-form'>
+            <h3>Update Movie</h3>
+            <form onSubmit={saveMovie}>
+                <label htmlFor='title'>Title</label>
+                <input type='text' name='title' placeholder='enter title' value={movie.title} onChange={handleChange} />
+                <label htmlFor='metascore'>Metascore</label>
+                <input type='number' name='metascore' placeholder={100} value={movie.metascore} onChange={handleChange} />
+                <label htmlFor='director'>Director</label>
+                <input type='text' name='director' placeholder='enter director' value={movie.director} onChange={handleChange} />
+                <label htmlFor='stars'>Actor</label>
+                <input type='text' name='stars' placeholder='enter actor' value={movie.stars} onChange={handleChange} />
+                <button className='update-btn'>Submit</button>
+            </form>
+        </div>
+    );
+};
 
-}
+export default UpdateMovie;
 
