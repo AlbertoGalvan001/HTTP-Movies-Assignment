@@ -1,69 +1,87 @@
 import React, { useState, useEffect } from 'react';
+import MovieCard from './MovieCard';
 import axios from 'axios';
 
-const initialState = {
-    title: '',
-    director: '',
-    metascore: '',
-    stars: '',
-}
 
-const UpdateMovie = props => {
-    const [movie, setMovie] = useState({ ...initialState });
 
+export default function UpdateMovie(props) {
+    const [movieEdit, setMovieEdit] = useState({
+        title: '',
+        director: '',
+        metascore: '',
+        stars: []
+    });
+
+    const [newStar, setNewStar] = useState('');
+    console.log('update movie edit', movieEdit);
+    let id = props.match.params.id;
     useEffect(() => {
-        const movieToUpdate = props.movies.filter(movie => {
-            return movie.id === props.match.params.id
-        })
-        movieToUpdate && setMovie(movieToUpdate)
-    }, [props.match.params.id])
+        fetchMovie(id);
+    }, []);
 
-    const handleChange = e => {
-        if (e.target.name === 'stars') {
-            const stars = e.target.value.split('');
-            setMovie({ ...movie, [e.target.name]: e.target.value })
-        }
-    }
-
-    const saveMovie = e => {
-        e.preventDefault();
-        console.log(movie);
+    const fetchMovie = id => {
         axios
-            .put(`http:localhost:5000/api/movies/${movie.id}`, movie)
-            .then(response => {
-                console.log(response);
-                props.setMovies(props.movies.map(item => {
-                    if (item.id === movie.id) {
-                        return response.data;
-                    } else {
-                        return item;
-                    }
-                }))
-                props.history.push('/');
+            .get(`http://localhost:5000/api/movies/${id}`)
+            .then(res => {
+                console.log('update movie res', res)
+                setMovieEdit(res.data);
             })
-            .catch(error => {
-                console.log(error.message);
+            .catch(err => console.log(err.response));
+    };
+
+    const changeHandler = e => {
+        e.preventDefault();
+
+        setMovieEdit({
+            ...movieEdit,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleStar = e => {
+        e.preventDefault();
+        setNewStar(e.target.value);
+    };
+
+    const setStar = str => {
+        setMovieEdit({
+            ...movieEdit,
+            stars: [...movieEdit.stars, str]
+        });
+        setNewStar('');
+    };
+
+    const handleSubmit = e => {
+        e.preventDefault();
+        axios
+            .put(`http://localhost:5000/api/movies/${id}`, movieEdit)
+            .then(res => {
+                console.log('put update response', res);
+                props.history.push(`/movies`);
             })
-        setMovie({ ...initialState });
-    }
+            .catch(err => console.log(err.response));
+    };
+
+
 
     return (
         <div className='update-form'>
             <h3>Update Movie</h3>
-            <form onSubmit={saveMovie}>
+            <form onSubmit={handleSubmit}>
                 <label htmlFor='title'>Title</label>
-                <input type='text' name='title' placeholder='enter title' value={movie.title} onChange={handleChange} />
+                <input type='text' name='title' placeholder='enter title' value={movieEdit.title} onChange={changeHandler} />
                 <label htmlFor='metascore'>Metascore</label>
-                <input type='number' name='metascore' placeholder={100} value={movie.metascore} onChange={handleChange} />
+                <input type='number' name='metascore' placeholder={100} value={movieEdit.metascore} onChange={changeHandler} />
                 <label htmlFor='director'>Director</label>
-                <input type='text' name='director' placeholder='enter director' value={movie.director} onChange={handleChange} />
+                <input type='text' name='director' placeholder='enter director' value={movieEdit.director} onChange={changeHandler} />
                 <label htmlFor='stars'>Actor</label>
-                <input type='text' name='stars' placeholder='enter actor' value={movie.stars} onChange={handleChange} />
+                <input type='text' name='stars' placeholder='enter actor' value={newStar} onChange={handleStar} />
                 <button className='update-btn'>Submit</button>
+                <MovieCard movie={movieEdit} />
             </form>
         </div>
     );
-};
+}
 
-export default UpdateMovie;
+
 
